@@ -35,8 +35,10 @@ Once you have your key, create a file named .env.local in the root directory of 
 
 Add your API key to the file, using the variable name defined in the code:
 
-# .env.local
+.env.local
+
 NEXT_PUBLIC_WEATHER_API_KEY="YOUR_OPENWEATHERMAP_API_KEY_HERE"
+
 4. Run the Application
 Start the development server:
 
