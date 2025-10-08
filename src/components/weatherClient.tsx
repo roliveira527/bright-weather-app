@@ -6,12 +6,6 @@ import SearchBox from './searchBox';
 const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
-const SUPPORTED_COUNTRIES = [
-    { name: 'United Kingdom', code: 'uk' },
-    { name: 'United States', code: 'us' },
-    { name: 'Germany', code: 'de' },
-];
-
 interface WeatherData {
     name: string;
     main: {
@@ -34,14 +28,13 @@ interface WeatherData {
 
 interface WeatherClientProps {
     initialCity: string;
+    initialCountryCode: string;
 }
 
-const WeatherClient = ({ initialCity }: WeatherClientProps) => {
+const WeatherClient = ({ initialCity, initialCountryCode }: WeatherClientProps) => {
     const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [countryCode, setCountryCode] = useState('uk');
-
 
     const capitalizeWords = (str: string): string => {
         return str.split(' ')
@@ -62,7 +55,7 @@ const WeatherClient = ({ initialCity }: WeatherClientProps) => {
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    throw new Error(`City "${cityToSearch}" not found in supported country.`);
+                    throw new Error(`City "${cityToSearch}" not found in country code ${code}.`);
                 }
                 throw new Error(`Failed to fetch data (HTTP status: ${response.status})`);
             }
@@ -88,56 +81,39 @@ const WeatherClient = ({ initialCity }: WeatherClientProps) => {
             return;
         }
 
-        fetchWeatherData(initialCity, countryCode);
+        fetchWeatherData(initialCity, initialCountryCode);
 
-    }, [initialCity, countryCode]);
+    }, [initialCity, initialCountryCode]);
 
     return (
         <div className="text-center p-12 min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/assets/background.jpg')]">
-            <div className="max-w-xl mx-auto bg-white/90 rounded-xl shadow-xl text-gray-800 border-2 border-black">
-                <SearchBox initialValue={initialCity} />
+
+            <div className="max-w-xl mx-auto p-4 bg-white/90 rounded-xl shadow-xl text-gray-800 border-2 border-black">
+                <SearchBox initialValue={initialCity} initialCountryCode={initialCountryCode} />
             </div>
 
             <div className="max-w-xl mx-auto mt-6 p-6 bg-white/90 rounded-xl shadow-xl text-gray-800 border-2 border-black">
-                <div className="flex justify-center items-center mb-4 space-x-2">
-                    <label htmlFor="country-select" className="font-semibold">Country:</label>
-                    <select
-                        id="country-select"
-                        value={countryCode}
-                        onChange={(e) => setCountryCode(e.target.value)}
-                        className="p-1 border border-gray-300 rounded-lg text-sm"
-                        disabled={loading}
-                    >
-                        {SUPPORTED_COUNTRIES.map((country) => (
-                            <option key={country.code} value={country.code}>
-                                {country.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                
-                {loading && <p>Loading weather for {initialCity}...</p>}
+                {loading && <p className="text-blue-600 font-medium">Loading weather for {initialCity}...</p>}
 
-                {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+                {error && <p className="text-red-600 font-medium" style={{ color: 'red' }}>Error: {error}</p>}
 
                 {weatherData && (
-                    <div>
-                        <h1 className="text-xl font-semibold mb-8">Weather Report: {weatherData.name}</h1>
+                    <div className="text-left mt-4 space-y-2">
+                        <h1 className="text-2xl font-bold mb-4 border-b pb-2">Weather Report for {weatherData.name} ({initialCountryCode.toUpperCase()})</h1>
 
-                        <p>Weather Conditions: {capitalizeWords(weatherData.weather[0].description)}</p>
-                        <p>Temperature: {weatherData.main.temp}°C</p>
-                        <p>Feels Like: {weatherData.main.feels_like}°C</p>
-                        <p>Humidity: {weatherData.main.humidity}%</p>
-                        <p>Min. Temperature: {weatherData.main.temp_min}°C</p>
-                        <p>Max. Temperature: {weatherData.main.temp_max}°C</p>
-                        <p>Wind Speed: {weatherData.wind.speed}mph</p>
+                        <p><strong>Weather Conditions:</strong> {capitalizeWords(weatherData.weather[0].description)}</p>
+                        <p><strong>Temperature:</strong> {weatherData.main.temp}°C</p>
+                        <p><strong>Feels Like:</strong> {weatherData.main.feels_like}°C</p>
+                        <p><strong>Humidity:</strong> {weatherData.main.humidity}%</p>
+                        <p><strong>Min. Temperature:</strong> {weatherData.main.temp_min}°C</p>
+                        <p><strong>Max. Temperature:</strong> {weatherData.main.temp_max}°C</p>
+                        <p><strong>Wind Speed:</strong> {weatherData.wind.speed}mph</p>
 
                         {weatherData.rain?.['1h'] && (
-                            <p>Rain Volume (Last Hr): {weatherData.rain['1h']} mm</p>
+                            <p><strong>Rain Volume (Last Hr):</strong> {weatherData.rain['1h']} mm</p>
                         )}
                     </div>
                 )}
-
             </div>
         </div>
     );
