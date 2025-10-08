@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import SearchBox from './searchBox';
+import { capitalizeWords } from '../utils/formatters';
 
-const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
 interface WeatherData {
@@ -36,15 +36,15 @@ const WeatherClient = ({ initialCity, initialCountryCode }: WeatherClientProps) 
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    const capitalizeWords = (str: string): string => {
-        return str.split(' ')
-            .map(word =>
-                word.charAt(0).toUpperCase() + word.slice(1)
-            )
-            .join(' ');
-    };
-
     const fetchWeatherData = async (cityToSearch: string, code: string) => {
+        const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
+
+        if (!API_KEY) {
+            setError('API Key invalid or not found.');
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         setError(null);
         setWeatherData(null);
@@ -75,12 +75,6 @@ const WeatherClient = ({ initialCity, initialCountryCode }: WeatherClientProps) 
     };
 
     useEffect(() => {
-        if (!API_KEY) {
-            setError('API Key invalid or not found.');
-            setLoading(false);
-            return;
-        }
-
         fetchWeatherData(initialCity, initialCountryCode);
 
     }, [initialCity, initialCountryCode]);
