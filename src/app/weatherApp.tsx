@@ -26,11 +26,20 @@ interface WeatherData {
 }
 
 const WeatherApp = () => {
+    const initialCity = 'London';
+
     const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState(initialCity);
 
-    const initialCity = 'London';
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (searchTerm.trim()) {
+            fetchWeatherData(searchTerm.trim());
+        }
+    };
 
     const fetchWeatherData = async (cityToSearch: string) => {
         setLoading(true);
@@ -50,6 +59,7 @@ const WeatherApp = () => {
 
             const data = await response.json();
             setWeatherData(data);
+            console.log(data)
 
         } catch (err) {
             if (err instanceof Error) {
@@ -76,14 +86,36 @@ const WeatherApp = () => {
         <div className="weather-container">
             <h1>UK Weather Finder</h1>
 
-            {loading && <p>Loading weather for {initialCity}...</p>}
+            <form onSubmit={handleSearch}>
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Enter city name (e.g., Manchester)"
+                    disabled={loading}
+                />
+                <button type="submit" disabled={loading}>
+                    Search
+                </button>
+            </form>
+
+            {loading && <p>Loading weather for {searchTerm}...</p>}
 
             {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
             {weatherData && (
                 <div>
                     <h2>Weather in {weatherData.name}</h2>
+                    <p>Weather Conditions: {weatherData.weather[0].description}</p>
                     <p>Temperature: {weatherData.main.temp}°C</p>
+                    <p>Feels Like: {weatherData.main.feels_like}°C</p>
+                    <p>Humidity: {weatherData.main.humidity}%</p>
+                    <p>Min. Temperature: {weatherData.main.temp_min}°C</p>
+                    <p>Max. Temperature: {weatherData.main.temp_max}°C</p>
+                    <p>Wind Speed: {weatherData.wind.speed}mph</p>
+                    {weatherData.rain?.['1h'] && (
+                        <p>Rain Volume (Last Hr): {weatherData.rain['1h']} mm</p>
+                    )}
                 </div>
             )}
         </div>
