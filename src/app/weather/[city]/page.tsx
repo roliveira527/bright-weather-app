@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import SearchBox from '../../components/searchBox';
 
 const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
@@ -25,20 +26,25 @@ interface WeatherData {
     };
 }
 
-const WeatherApp = () => {
-    const initialCity = 'London';
+interface WeatherPageProps {
+    params: {
+        city: string;
+    };
+}
+
+const WeatherResultsPage = ({ params }: WeatherPageProps) => {
+    const urlCity = decodeURIComponent(params.city);
 
     const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState(initialCity);
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (searchTerm.trim()) {
-            fetchWeatherData(searchTerm.trim());
-        }
+    const capitalizeWords = (str: string): string => {
+        return str.split(' ')
+            .map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            )
+            .join(' ');
     };
 
     const fetchWeatherData = async (cityToSearch: string) => {
@@ -57,9 +63,8 @@ const WeatherApp = () => {
                 throw new Error(`Failed to fetch data (HTTP status: ${response.status})`);
             }
 
-            const data = await response.json();
+            const data: WeatherData = await response.json();
             setWeatherData(data);
-            console.log(data)
 
         } catch (err) {
             if (err instanceof Error) {
@@ -79,40 +84,31 @@ const WeatherApp = () => {
             return;
         }
 
-        fetchWeatherData(initialCity);
-    }, []);
+        fetchWeatherData(urlCity);
+    }, [urlCity]);
 
     return (
         <div className="weather-container">
-            <h1>UK Weather Finder</h1>
+            <SearchBox initialValue={urlCity} /> 
+            
+            <h1>UK Weather Report</h1>
 
-            <form onSubmit={handleSearch}>
-                <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Enter city name (e.g., Manchester)"
-                    disabled={loading}
-                />
-                <button type="submit" disabled={loading}>
-                    Search
-                </button>
-            </form>
-
-            {loading && <p>Loading weather for {searchTerm}...</p>}
+            {loading && <p>Loading weather for {urlCity}...</p>}
 
             {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
             {weatherData && (
                 <div>
-                    <h2>Weather in {weatherData.name}</h2>
-                    <p>Weather Conditions: {weatherData.weather[0].description}</p>
+                    <h2>Weather in {weatherData.name}</h2> 
+                    
+                    <p>Weather Conditions: {capitalizeWords(weatherData.weather[0].description)}</p>
                     <p>Temperature: {weatherData.main.temp}°C</p>
                     <p>Feels Like: {weatherData.main.feels_like}°C</p>
                     <p>Humidity: {weatherData.main.humidity}%</p>
                     <p>Min. Temperature: {weatherData.main.temp_min}°C</p>
                     <p>Max. Temperature: {weatherData.main.temp_max}°C</p>
                     <p>Wind Speed: {weatherData.wind.speed}mph</p>
+                    
                     {weatherData.rain?.['1h'] && (
                         <p>Rain Volume (Last Hr): {weatherData.rain['1h']} mm</p>
                     )}
@@ -122,4 +118,4 @@ const WeatherApp = () => {
     );
 };
 
-export default WeatherApp;
+export default WeatherResultsPage;
