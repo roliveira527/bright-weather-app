@@ -60,7 +60,15 @@ const WeatherApp = () => {
         }
     };
 
-    // useEffect hook
+    useEffect(() => {
+        if (!API_KEY) {
+            setError('API Key invalid or not found.');
+            setLoading(false);
+            return;
+        }
+
+        fetchWeatherData(initialCity);
+    }, []);
 
     return (
         <div className="weather-container">
