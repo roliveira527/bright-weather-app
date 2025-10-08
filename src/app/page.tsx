@@ -1,4 +1,4 @@
-import SearchBox from './components/searchBox';
+import SearchBox from '../components/searchBox';
 
 export default function HomePage() {
     return (
