@@ -88,32 +88,35 @@ const WeatherResultsPage = ({ params }: WeatherPageProps) => {
     }, [urlCity]);
 
     return (
-        <div className="weather-container">
-            <SearchBox initialValue={urlCity} /> 
-            
-            <h1>UK Weather Report</h1>
+        <div className="text-center p-12 min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/assets/background.jpg')]">
+            <div className="max-w-xl mx-auto bg-white/90 rounded-xl shadow-xl text-gray-800 border-2 border-black">
+                <SearchBox initialValue={urlCity} />
+            </div>
 
-            {loading && <p>Loading weather for {urlCity}...</p>}
+            <div className="max-w-xl mx-auto mt-6 p-6 bg-white/90 rounded-xl shadow-xl text-gray-800 border-2 border-black">
+                {loading && <p>Loading weather for {urlCity}...</p>}
 
-            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+                {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
-            {weatherData && (
-                <div>
-                    <h2>Weather in {weatherData.name}</h2> 
-                    
-                    <p>Weather Conditions: {capitalizeWords(weatherData.weather[0].description)}</p>
-                    <p>Temperature: {weatherData.main.temp}°C</p>
-                    <p>Feels Like: {weatherData.main.feels_like}°C</p>
-                    <p>Humidity: {weatherData.main.humidity}%</p>
-                    <p>Min. Temperature: {weatherData.main.temp_min}°C</p>
-                    <p>Max. Temperature: {weatherData.main.temp_max}°C</p>
-                    <p>Wind Speed: {weatherData.wind.speed}mph</p>
-                    
-                    {weatherData.rain?.['1h'] && (
-                        <p>Rain Volume (Last Hr): {weatherData.rain['1h']} mm</p>
-                    )}
-                </div>
-            )}
+                {weatherData && (
+                    <div>
+                        <h1 className="text-xl font-semibold mb-8">Weather Report: {weatherData.name}</h1>
+
+                        <p>Weather Conditions: {capitalizeWords(weatherData.weather[0].description)}</p>
+                        <p>Temperature: {weatherData.main.temp}°C</p>
+                        <p>Feels Like: {weatherData.main.feels_like}°C</p>
+                        <p>Humidity: {weatherData.main.humidity}%</p>
+                        <p>Min. Temperature: {weatherData.main.temp_min}°C</p>
+                        <p>Max. Temperature: {weatherData.main.temp_max}°C</p>
+                        <p>Wind Speed: {weatherData.wind.speed}mph</p>
+
+                        {weatherData.rain?.['1h'] && (
+                            <p>Rain Volume (Last Hr): {weatherData.rain['1h']} mm</p>
+                        )}
+                    </div>
+                )}
+
+            </div>
         </div>
     );
 };
