@@ -30,7 +30,35 @@ const WeatherApp = () => {
 
     const initialCity = 'London';
 
-    // API fetching function
+    const fetchWeatherData = async (cityToSearch: string) => {
+        setLoading(true);
+        setError(null);
+        setWeatherData(null);
+
+        try {
+            const url = `${BASE_URL}?q=${cityToSearch},uk&units=metric&appid=${API_KEY}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error(`City "${cityToSearch}" not found. Please check spelling.`);
+                }
+                throw new Error(`Failed to fetch data (HTTP status: ${response.status})`);
+            }
+
+            const data = await response.json();
+            setWeatherData(data);
+
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('An unknown error occurred.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // useEffect hook
 
